@@ -11,20 +11,27 @@ def explore_dataset(words):
     print(f"Unique characters ({len(chars)}): {''.join(chars)}")
     return chars
 
+
+def generate_bigrams(words):
+    for word in words:
+        w = "." + word + "."
+        yield from zip(w, w[1:])
+
+
+def build_bigram_table(words, stoi):
+    N = torch.zeros((27, 27), dtype=torch.int32)
+    for c1, c2 in generate_bigrams(words):
+        N[stoi[c1]][stoi[c2]] += 1
+    return N
+
+
 chars = explore_dataset(words)
 
-# --- Step 2: Build bigram frequency table ---
-stoi = {ch: i + 1 for i, ch in enumerate(chars)}  # char -> index ('a'=1, ..., 'z'=26)
-stoi["."] = 0  # special start/end token
-itos = {i: ch for ch, i in stoi.items()}  # index -> char
+stoi = {ch: i + 1 for i, ch in enumerate(chars)}
+stoi["."] = 0
+itos = {i: ch for ch, i in stoi.items()}
 
-N = torch.zeros((27, 27), dtype=torch.int32)  # bigram count matrix
-
-for word in words:
-    w = "." + word + "."
-    for c1, c2 in zip(w, w[1:]):
-        N[stoi[c1]][stoi[c2]] += 1
-
+N = build_bigram_table(words, stoi)
 print(f"Total bigrams counted: {N.sum().item()}")
 
 # --- Step 3: Sample from the bigram model ---
