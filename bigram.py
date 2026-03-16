@@ -58,18 +58,27 @@ g = torch.Generator().manual_seed(2147483647)
 for i in range(5):
     print(sample_name(P, itos, g))
 
-# --- Step 4: Compute NLL loss ---
-log_likelihood = 0.0
-n = 0  # total number of bigrams
-
-# TODO(human): Loop through all bigrams, sum up log probabilities, compute NLL
-for word in words:
-    w = "." + word + "."
-    for c1, c2 in zip(w, w[1:]):
+def compute_nll(P, words, stoi):
+    log_likelihood = 0.0
+    n = 0
+    for c1, c2 in generate_bigrams(words):
         log_likelihood += torch.log(P[stoi[c1]][stoi[c2]])
         n += 1
+    return -log_likelihood / n
 
-log_likelihood /= n
-log_likelihood *= -1
 
-print(f"{log_likelihood=}")
+# --- Step 4: Compute NLL loss ---
+nll = compute_nll(P, words, stoi)
+print(f"NLL: {nll.item():.4f}")
+
+# Sanity check: NLL should be less than uniform model (log(27) ≈ 3.30)
+import math
+uniform_nll = math.log(27)
+assert nll < uniform_nll, f"NLL {nll:.4f} >= uniform {uniform_nll:.4f}, model is worse than random!"
+print(f"Uniform NLL: {uniform_nll:.4f} (our model is better: {nll.item():.4f} < {uniform_nll:.4f})")
+
+# Sanity check: uniform P should give NLL ≈ log(27)
+P_uniform = torch.ones(27, 27) / 27
+nll_uniform = compute_nll(P_uniform, words, stoi)
+assert torch.isclose(nll_uniform, torch.tensor(uniform_nll), atol=1e-4)
+print(f"Uniform P sanity check passed: {nll_uniform.item():.4f} ≈ {uniform_nll:.4f}")
