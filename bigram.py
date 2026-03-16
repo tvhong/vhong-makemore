@@ -3,13 +3,15 @@ import torch
 # --- Data loading ---
 words = open("names.txt").read().splitlines()
 
-# --- Step 1: Explore the dataset ---
-print(f"Total names: {len(words)}")
-print(f"Shortest: {min(words, key=len)!r} ({len(min(words, key=len))} chars)")
-print(f"Longest: {max(words, key=len)!r} ({len(max(words, key=len))} chars)")
+def explore_dataset(words):
+    print(f"Total names: {len(words)}")
+    print(f"Shortest: {min(words, key=len)!r} ({len(min(words, key=len))} chars)")
+    print(f"Longest: {max(words, key=len)!r} ({len(max(words, key=len))} chars)")
+    chars = sorted(set("".join(words)))
+    print(f"Unique characters ({len(chars)}): {''.join(chars)}")
+    return chars
 
-chars = sorted(set("".join(words)))
-print(f"Unique characters ({len(chars)}): {''.join(chars)}")
+chars = explore_dataset(words)
 
 # --- Step 2: Build bigram frequency table ---
 stoi = {ch: i + 1 for i, ch in enumerate(chars)}  # char -> index ('a'=1, ..., 'z'=26)
@@ -42,4 +44,17 @@ for i in range(5):
     print("".join(out))
 
 # --- Step 4: Compute NLL loss ---
-# TODO
+log_likelihood = 0.0
+n = 0  # total number of bigrams
+
+# TODO(human): Loop through all bigrams, sum up log probabilities, compute NLL
+for word in words:
+    w = "." + word + "."
+    for c1, c2 in zip(w, w[1:]):
+        log_likelihood += torch.log(P[stoi[c1]][stoi[c2]])
+        n += 1
+
+log_likelihood /= n
+log_likelihood *= -1
+
+print(f"{log_likelihood=}")
