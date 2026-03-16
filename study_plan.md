@@ -22,7 +22,11 @@ A character-level language model that learns to generate name-like strings by tr
 
 ### Study Method: Watch-then-Implement Blocks
 
-Interleave watching and coding. Watch a section, pause, implement it yourself, then move on. This avoids passive watching while giving you enough context to code with productive struggle.
+Interleave watching and coding. Watch a section, pause, then:
+1. **Quiz** — answer 5-10 consolidation questions to check understanding before touching code
+2. **Implement** — code it up yourself
+
+This avoids passive watching while giving you enough context to code with productive struggle. The quiz step catches gaps in understanding early, before they become debugging headaches.
 
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 
