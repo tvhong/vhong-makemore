@@ -28,6 +28,7 @@ print(f"Total bigrams counted: {N.sum().item()}")
 # --- Step 3: Sample from the bigram model ---
 P = N.float()
 P /= P.sum(dim=1, keepdims=True)
+assert torch.allclose(P.sum(dim=1), torch.ones(27))
 
 g = torch.Generator().manual_seed(2147483647)
 
