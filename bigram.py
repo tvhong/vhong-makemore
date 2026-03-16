@@ -23,8 +23,22 @@ for word in words:
     for c1, c2 in zip(w, w[1:]):
         N[stoi[c1]][stoi[c2]] += 1
 
+print(f"Total bigrams counted: {N.sum().item()}")
+
 # --- Step 3: Sample from the bigram model ---
-# TODO
+P = N.float()
+P /= P.sum(dim=1, keepdims=True)
+
+g = torch.Generator().manual_seed(2147483647)
+
+for i in range(5):
+    out = []
+    ix = torch.multinomial(P[0], num_samples=1, generator=g).item()
+    while ix != 0:
+        out.append(itos[ix])
+        ix = torch.multinomial(P[ix], num_samples=1, generator=g).item()
+
+    print("".join(out))
 
 # --- Step 4: Compute NLL loss ---
 # TODO
