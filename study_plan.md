@@ -36,10 +36,10 @@ This avoids passive watching while giving you enough context to code with produc
 
 **Watch** the first ~40 minutes, covering the counting-based bigram approach. Then pause and implement:
 
-1. [ ] Download and explore the names dataset
-2. [ ] Build bigram frequency table from the dataset
-3. [ ] Implement sampling from the bigram model
-4. [ ] Compute loss (negative log likelihood) on the dataset
+1. [x] Download and explore the names dataset
+2. [x] Build bigram frequency table from the dataset
+3. [x] Implement sampling from the bigram model
+4. [x] Compute loss (negative log likelihood) on the dataset
 
 #### Block 2: Neural Network Model (~1h watch, ~1.5h implement)
 
