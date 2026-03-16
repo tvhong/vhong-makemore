@@ -32,6 +32,12 @@ Interleave watching and coding. Watch a section, pause, then:
 
 This avoids passive watching while giving you enough context to code with productive struggle. The quiz step catches gaps in understanding early, before they become debugging headaches.
 
+### Time Log
+
+| Date | Hours | What |
+|------|-------|------|
+| Mar 13 | 2h | Block 1: watched bigram section + implemented counting model |
+
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 
 **Watch** the first ~40 minutes, covering the counting-based bigram approach. Then pause and implement:
