@@ -40,19 +40,23 @@ def normalize(N):
     assert torch.allclose(P.sum(dim=1), torch.ones(27))
     return P
 
+def sample_name(P, itos, g):
+    out = []
+    ix = 0
+    while True:
+        ix = torch.multinomial(P[ix], num_samples=1, generator=g).item()
+        if ix == 0:
+            break
+        out.append(itos[ix])
+    return "".join(out)
+
+
 # --- Step 3: Sample from the bigram model ---
 P = normalize(N)
 
 g = torch.Generator().manual_seed(2147483647)
-
 for i in range(5):
-    out = []
-    ix = torch.multinomial(P[0], num_samples=1, generator=g).item()
-    while ix != 0:
-        out.append(itos[ix])
-        ix = torch.multinomial(P[ix], num_samples=1, generator=g).item()
-
-    print("".join(out))
+    print(sample_name(P, itos, g))
 
 # --- Step 4: Compute NLL loss ---
 log_likelihood = 0.0
