@@ -8,6 +8,7 @@
 **Est. Hours**: 5h
 
 ### Key Concepts
+
 - Bigram character-level language model
 - PyTorch tensors and basic operations
 - Language modeling fundamentals (predicting next character)
@@ -16,14 +17,17 @@
 - Negative log likelihood loss
 
 ### What We'll Build
+
 A character-level language model that learns to generate name-like strings by training on a dataset of names. Two approaches:
+
 1. **Bigram counting model** — count character pair frequencies, normalize to get probabilities
 2. **Neural network model** — single-layer neural net that learns the same distribution
 
 ### Study Method: Watch-then-Implement Blocks
 
 Interleave watching and coding. Watch a section, pause, then:
-1. **Quiz** — answer 5-10 consolidation questions to check understanding before touching code
+
+1. **Quiz** — answer 3-7 questions to check understanding before touching code
 2. **Implement** — code it up yourself
 
 This avoids passive watching while giving you enough context to code with productive struggle. The quiz step catches gaps in understanding early, before they become debugging headaches.
