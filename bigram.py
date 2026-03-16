@@ -34,10 +34,14 @@ itos = {i: ch for ch, i in stoi.items()}
 N = build_bigram_table(words, stoi)
 print(f"Total bigrams counted: {N.sum().item()}")
 
+def normalize(N):
+    P = N.float()
+    P /= P.sum(dim=1, keepdim=True)
+    assert torch.allclose(P.sum(dim=1), torch.ones(27))
+    return P
+
 # --- Step 3: Sample from the bigram model ---
-P = N.float()
-P /= P.sum(dim=1, keepdims=True)
-assert torch.allclose(P.sum(dim=1), torch.ones(27))
+P = normalize(N)
 
 g = torch.Generator().manual_seed(2147483647)
 
