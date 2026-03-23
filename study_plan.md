@@ -37,6 +37,7 @@ This avoids passive watching while giving you enough context to code with produc
 | Date | Hours | What |
 |------|-------|------|
 | Mar 13 | 2h | Block 1: watched bigram section + implemented counting model |
+| Mar 23 | — | Block 2: started 10:30, watching neural net section (40:00–1:40:00) |
 
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 
