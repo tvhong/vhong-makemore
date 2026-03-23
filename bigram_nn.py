@@ -30,12 +30,28 @@ print(xs.shape, xenc.shape)
 
 # Initialize weights
 g = torch.Generator().manual_seed(2147483647)
-W = torch.randn((27, 27), generator=g)
+W = torch.randn((27, 27), generator=g, requires_grad=True)
 
-# Forward pass: logits -> softmax -> probabilities
-logits = xenc @ W
-counts = logits.exp()
-probs = counts / counts.sum(dim=1, keepdim=True)
+# --- Training loop ---
+
+for epoch in range(50):
+    # Forward pass
+    logits = xenc @ W
+    counts = logits.exp()
+    probs = counts / counts.sum(dim=1, keepdim=True)
+
+    # Loss: negative log likelihood
+    loss = -probs[range(len(ys)), ys].log().mean()
+
+    # Backward pass
+    loss.backward()
+
+    # Update weights
+    W.data -= 50 * W.grad
+
+    W.grad.zero_()
+
+    print(f"Epoch {epoch}: loss = {loss.item():.4f}")
 
 # Check: print probability for first 5 examples
 for i in range(5):
