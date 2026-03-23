@@ -37,7 +37,7 @@ This avoids passive watching while giving you enough context to code with produc
 | Date | Hours | What |
 |------|-------|------|
 | Mar 13 | 2h | Block 1: watched bigram section + implemented counting model |
-| Mar 23 | — | Block 2: started 10:30, watching neural net section (40:00–1:40:00) |
+| Mar 23 | 1.75h | Block 2: quiz + implemented forward pass & training loop (steps 5–6) |
 
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 
@@ -52,8 +52,8 @@ This avoids passive watching while giving you enough context to code with produc
 
 **Watch** the next ~1 hour, covering the neural net reframing. Then pause and implement:
 
-5. [ ] Reframe as a neural network with one-hot encoding
-6. [ ] Train the neural net with gradient descent
+5. [x] Reframe as a neural network with one-hot encoding
+6. [x] Train the neural net with gradient descent
 7. [ ] Compare neural net results to the counting approach
 8. [ ] Sample from the trained neural net
 
