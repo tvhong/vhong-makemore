@@ -76,3 +76,16 @@ P_nn = torch.softmax(W.data, dim=1)
 diff = (P_nn - P_count).abs()
 print(f"\nMax absolute difference: {diff.max().item():.4f}")
 print(f"Mean absolute difference: {diff.mean().item():.4f}")
+
+# --- Step 8: Sample from the trained neural net ---
+
+g = torch.Generator().manual_seed(2147483647)
+for _ in range(5):
+    ix = 0
+    name = []
+    while True:
+        ix = torch.multinomial(P_nn[ix], num_samples=1, generator=g).item()
+        if ix == 0:
+            break
+        name.append(itos[ix])
+    print("".join(name))
