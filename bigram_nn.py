@@ -34,7 +34,7 @@ W = torch.randn((27, 27), generator=g, requires_grad=True)
 
 # --- Training loop ---
 
-for epoch in range(50):
+for epoch in range(200):
     # Forward pass
     logits = xenc @ W
     counts = logits.exp()
@@ -57,3 +57,22 @@ for epoch in range(50):
 for i in range(5):
     print(f"Input: {itos[xs[i].item()]!r} -> Target: {itos[ys[i].item()]!r}")
     print(f"  P(target) = {probs[i, ys[i]].item():.4f}")
+
+# --- Step 7: Compare neural net to counting model ---
+
+# Counting model: build bigram table and normalize
+N = torch.zeros((27, 27), dtype=torch.int32)
+for word in words:
+    w = "." + word + "."
+    for c1, c2 in zip(w, w[1:]):
+        N[stoi[c1]][stoi[c2]] += 1
+P_count = N.float()
+P_count /= P_count.sum(dim=1, keepdim=True)
+
+# Neural net model: softmax of weight matrix
+P_nn = torch.softmax(W.data, dim=1)
+
+# Compare
+diff = (P_nn - P_count).abs()
+print(f"\nMax absolute difference: {diff.max().item():.4f}")
+print(f"Mean absolute difference: {diff.mean().item():.4f}")
