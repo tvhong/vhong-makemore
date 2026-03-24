@@ -89,23 +89,26 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 
 | Date | Hours | What |
 |------|-------|------|
+| Mar 24 | 1h | Blocks 1–2: quiz, implemented embedding + MLP training (steps 1–7) |
 
 #### Block 1: Embeddings & Dataset (~25 min watch, ~1h implement)
 
 **Watch** the first ~25 minutes, covering the embedding lookup and dataset construction. Then pause and implement:
 
-1. [ ] Build the dataset with a context window (e.g., block_size=3)
-2. [ ] Implement the embedding lookup table (C matrix)
-3. [ ] Verify shapes: input indices → embedded vectors → concatenated context
+1. [x] Build the dataset with a context window (e.g., block_size=3)
+2. [x] Implement the embedding lookup table (C matrix)
+3. [x] Verify shapes: input indices → embedded vectors → concatenated context
 
 #### Block 2: MLP Forward Pass & Training (~25 min watch, ~1.5h implement)
 
 **Watch** the next ~25 minutes, covering the MLP architecture and training. Then pause and implement:
 
-4. [ ] Build the hidden layer (W1, b1) with tanh activation
-5. [ ] Build the output layer (W2, b2) and softmax
-6. [ ] Implement the training loop with cross-entropy loss
-7. [ ] Train and check that loss decreases
+4. [x] Build the hidden layer (W1, b1) with tanh activation
+5. [x] Build the output layer (W2, b2) and softmax
+6. [x] Implement the training loop with cross-entropy loss
+7. [x] Train and check that loss decreases
+
+> **Note**: Watch the initialization section of this lecture before continuing. Weight initialization (why W2 needs to be small, why initial loss should be ~log(27)) is not yet fully understood. Key idea: large initial weights → confident wrong predictions → high initial loss → slow training.
 
 #### Block 3: Splitting, Tuning & Sampling (~25 min watch, ~1h implement)
 
