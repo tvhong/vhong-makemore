@@ -15,14 +15,17 @@ FIND: Why don't the rows sum to 1?
 import torch
 
 # Frequency counts: 3 contexts, 4 possible next characters
-N = torch.tensor([
-    [5, 3, 2, 0],
-    [1, 7, 1, 1],
-    [0, 2, 6, 2],
-], dtype=torch.float32)
+N = torch.tensor(
+    [
+        [5, 3, 2, 0],
+        [1, 7, 1, 1],
+        [0, 2, 6, 2],
+    ],
+    dtype=torch.float32,
+)
 
 # Normalize each row to get probabilities
-P = N / N.sum(dim=0)
+P = N / N.sum(dim=1, keepdim=True)
 
 # Check: every row should sum to 1.0
 row_sums = P.sum(dim=1)
