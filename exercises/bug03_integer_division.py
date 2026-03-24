@@ -14,18 +14,22 @@ FIND: Why are all the probabilities zero?
 import torch
 
 # Bigram counts: 3 contexts, 4 possible next characters
-N = torch.tensor([
-    [5, 3, 2, 0],
-    [1, 7, 1, 1],
-    [0, 2, 6, 2],
-], dtype=torch.float32)
+N = torch.tensor(
+    [
+        [5, 3, 2, 0],
+        [1, 7, 1, 1],
+        [0, 2, 6, 2],
+    ],
+    dtype=torch.float32,
+)
 
 # Pre-allocate probability matrix
-P = torch.zeros(3, 4, dtype=torch.int64)
+P = torch.zeros(3, 4, dtype=torch.float32)
 
 # Normalize each row
 for i in range(3):
     row_sum = N[i].sum()
+    print(N[i] / row_sum)
     P[i] = N[i] / row_sum
 
 print("Probability matrix:")

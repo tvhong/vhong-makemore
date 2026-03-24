@@ -17,15 +17,20 @@ import torch
 
 # A small 4x4 probability matrix (4 characters: a, b, c, d)
 # Each row is a probability distribution over next characters
-P = torch.tensor([
-    [0.7, 0.2, 0.1, 0.0],  # after 'a': never goes to 'd'
-    [0.3, 0.3, 0.4, 0.0],  # after 'b': never goes to 'd'
-    [0.1, 0.1, 0.5, 0.3],  # after 'c'
-    [0.2, 0.3, 0.2, 0.3],  # after 'd'
-])
+P = torch.tensor(
+    [
+        [0.7, 0.2, 0.1, 0.0],  # after 'a': never goes to 'd'
+        [0.3, 0.3, 0.4, 0.0],  # after 'b': never goes to 'd'
+        [0.1, 0.1, 0.5, 0.3],  # after 'c'
+        [0.2, 0.3, 0.2, 0.3],  # after 'd'
+    ]
+)
+
+P += 1e-6
+P /= P.sum(dim=0, keepdim=True)
 
 # A sequence to evaluate: a -> b -> a -> d -> a
-contexts =   [0, 1, 0, 3]  # a, b, a, d
+contexts = [0, 1, 0, 3]  # a, b, a, d
 next_chars = [1, 0, 3, 0]  # b, a, d, a
 
 # Compute NLL

@@ -38,6 +38,7 @@ This avoids passive watching while giving you enough context to code with produc
 |------|-------|------|
 | Mar 13 | 2h | Block 1: watched bigram section + implemented counting model |
 | Mar 23 | 1.75h | Block 2: quiz + implemented forward pass & training loop (steps 5–6) |
+| Mar 24 | — | Block 2 continued: steps 7–8 (session start 19:26) |
 
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 

@@ -23,7 +23,7 @@ data = torch.randn(3, 3)
 
 # Compute mean of each feature (across the batch dimension)
 # We want the mean of each COLUMN
-feature_means = data.mean(dim=1)
+feature_means = data.mean(dim=0)  # (3,)
 
 # Center the data
 centered = data - feature_means
@@ -34,7 +34,7 @@ print("Original data:")
 print(data)
 print(f"\nMeans computed: {feature_means}")
 print(f"Means shape:   {feature_means.shape}")
-print(f"\nCentered data:")
+print("\nCentered data:")
 print(centered)
 print(f"\nColumn means (should be ~0): {col_means}")
 print(f"All close to zero? {torch.allclose(col_means, torch.zeros(3), atol=1e-6)}")
