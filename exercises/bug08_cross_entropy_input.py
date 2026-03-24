@@ -24,20 +24,22 @@ labels = torch.tensor([0, 1, 2, 0])
 # Row 0: class 0 has the highest logit (5.0)
 # Row 1: class 1 has the highest logit (5.0)
 # etc.
-logits = torch.tensor([
-    [ 5.0, -1.0, -1.0],  # strongly predicts class 0 ✓
-    [-1.0,  5.0, -1.0],  # strongly predicts class 1 ✓
-    [-1.0, -1.0,  5.0],  # strongly predicts class 2 ✓
-    [ 5.0, -1.0, -1.0],  # strongly predicts class 0 ✓
-])
+logits = torch.tensor(
+    [
+        [5.0, -1.0, -1.0],  # strongly predicts class 0 ✓
+        [-1.0, 5.0, -1.0],  # strongly predicts class 1 ✓
+        [-1.0, -1.0, 5.0],  # strongly predicts class 2 ✓
+        [5.0, -1.0, -1.0],  # strongly predicts class 0 ✓
+    ]
+)
 
 # Convert logits to probabilities first, then compute loss
 probs = logits.softmax(dim=1)
 print("Probabilities (model is clearly confident and correct):")
 print(probs)
 
-loss = F.cross_entropy(probs, labels)
+loss = F.cross_entropy(logits, labels)
 
 print(f"\nLoss: {loss.item():.4f}")
-print(f"Expected for a confident correct model: ~0.0")
-print(f"Something is wrong!" if loss.item() > 0.5 else "Loss looks reasonable")
+print("Expected for a confident correct model: ~0.0")
+print("Something is wrong!" if loss.item() > 0.5 else "Loss looks reasonable")

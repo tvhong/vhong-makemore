@@ -33,6 +33,8 @@ b = torch.zeros(1, requires_grad=True)
 lr = 0.1
 losses = []
 
+print(f"{x.shape=}")
+print(f"{W.shape=}")
 for i in range(50):
     # Forward pass
     y_pred = x @ W + b
@@ -47,9 +49,15 @@ for i in range(50):
         W -= lr * W.grad
         b -= lr * b.grad
 
+    W.grad.zero_()
+    b.grad.zero_()
     if i % 10 == 0:
-        print(f"Step {i:3d}: loss = {loss.item():.4f}, W = {W.item():.3f}, b = {b.item():.3f}")
+        print(
+            f"Step {i:3d}: loss = {loss.item():.4f}, W = {W.item():.3f}, b = {b.item():.3f}"
+        )
 
-print(f"\nFinal: W = {W.item():.3f} (expected ~2.0), b = {b.item():.3f} (expected ~1.0)")
+print(
+    f"\nFinal: W = {W.item():.3f} (expected ~2.0), b = {b.item():.3f} (expected ~1.0)"
+)
 print(f"Loss trend: {losses[0]:.2f} -> {losses[-1]:.2f} (should decrease)")
 print(f"Loss stable? {losses[-1] < losses[0]}")

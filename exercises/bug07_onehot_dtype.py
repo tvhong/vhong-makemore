@@ -25,7 +25,7 @@ indices = torch.tensor([0, 3, 1, 2, 1])
 num_classes = 4
 
 # One-hot encode
-one_hot = F.one_hot(indices, num_classes=num_classes)
+one_hot = F.one_hot(indices, num_classes=num_classes).float()
 print(f"One-hot shape: {one_hot.shape}")
 print(f"One-hot dtype: {one_hot.dtype}")
 print(f"One-hot:\n{one_hot}")

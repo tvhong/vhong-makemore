@@ -36,20 +36,22 @@ for i in range(20):
 
     # Backward pass
     if not W.requires_grad:
-        print(f"  ⚠ W.requires_grad is False! backward() will fail.")
+        print("  ⚠ W.requires_grad is False! backward() will fail.")
         print(f"  Training stopped early at step {i}.")
         break
     loss.backward()
 
     # Update weights
     with torch.no_grad():
-        W = W - lr * W.grad
+        W -= lr * W.grad
 
     # Zero gradients for next iteration
     if W.grad is not None:
         W.grad.zero_()
 
     if i % 5 == 0:
-        print(f"Step {i:3d}: loss = {loss.item():.4f}, W = {W.item():.3f}, requires_grad = {W.requires_grad}")
+        print(
+            f"Step {i:3d}: loss = {loss.item():.4f}, W = {W.item():.3f}, requires_grad = {W.requires_grad}"
+        )
 
 print(f"\nFinal W = {W.item():.3f} (expected ~3.0)")

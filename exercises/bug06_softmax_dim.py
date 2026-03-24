@@ -25,11 +25,11 @@ torch.manual_seed(42)
 logits = torch.randn(4, 3)
 
 # Apply softmax to get probabilities per example
-probs = logits.softmax(dim=0)
+probs = logits.softmax(dim=1)
 
 print("Logits (4 examples, 3 classes):")
 print(logits)
-print(f"\nProbabilities after softmax:")
+print("\nProbabilities after softmax:")
 print(probs)
 print(f"\nRow sums (should be 1.0): {probs.sum(dim=1)}")
 print(f"Col sums (should NOT be 1.0): {probs.sum(dim=0)}")
