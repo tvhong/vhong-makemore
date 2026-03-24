@@ -38,7 +38,7 @@ This avoids passive watching while giving you enough context to code with produc
 |------|-------|------|
 | Mar 13 | 2h | Block 1: watched bigram section + implemented counting model |
 | Mar 23 | 1.75h | Block 2: quiz + implemented forward pass & training loop (steps 5–6) |
-| Mar 24 | — | Block 2 continued: steps 7–8 (session start 19:26) |
+| Mar 24 | 2h | Bug exercises, Block 2 steps 7–8, planned Lecture 3 |
 
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 
@@ -55,9 +55,63 @@ This avoids passive watching while giving you enough context to code with produc
 
 5. [x] Reframe as a neural network with one-hot encoding
 6. [x] Train the neural net with gradient descent
-7. [ ] Compare neural net results to the counting approach
-8. [ ] Sample from the trained neural net
+7. [x] Compare neural net results to the counting approach
+8. [x] Sample from the trained neural net
 
 #### Block 3: Wrap-up (~15 min watch)
 
 **Watch** the remaining wrap-up and review.
+
+---
+
+## Lecture 3: Makemore — MLP (Bengio et al. 2003)
+
+**Video**: [Building makemore Part 2: MLP](https://www.youtube.com/watch?v=TCH_1BHY58I) (1h15m)
+**Linear Issue**: [VY-392](https://linear.app/aisi/issue/VY-392)
+**Due**: Mar 28, 2026
+**Est. Hours**: 5h
+
+### Key Concepts
+
+- Character-level embeddings (lookup table)
+- Multi-layer perceptron (MLP) architecture
+- Context window: using more than one previous character
+- Hidden layer with tanh activation
+- Train/validation/test splits
+- Hyperparameter tuning (embedding size, hidden layer size, learning rate)
+- Overfitting and underfitting
+
+### What We'll Build
+
+An MLP that takes a fixed-size context window of previous characters (e.g., 3) and predicts the next character. This is a big step up from bigrams — the model can now use more context to make better predictions.
+
+### Time Log
+
+| Date | Hours | What |
+|------|-------|------|
+
+#### Block 1: Embeddings & Dataset (~25 min watch, ~1h implement)
+
+**Watch** the first ~25 minutes, covering the embedding lookup and dataset construction. Then pause and implement:
+
+1. [ ] Build the dataset with a context window (e.g., block_size=3)
+2. [ ] Implement the embedding lookup table (C matrix)
+3. [ ] Verify shapes: input indices → embedded vectors → concatenated context
+
+#### Block 2: MLP Forward Pass & Training (~25 min watch, ~1.5h implement)
+
+**Watch** the next ~25 minutes, covering the MLP architecture and training. Then pause and implement:
+
+4. [ ] Build the hidden layer (W1, b1) with tanh activation
+5. [ ] Build the output layer (W2, b2) and softmax
+6. [ ] Implement the training loop with cross-entropy loss
+7. [ ] Train and check that loss decreases
+
+#### Block 3: Splitting, Tuning & Sampling (~25 min watch, ~1h implement)
+
+**Watch** the remaining section on evaluation and tuning. Then pause and implement:
+
+8. [ ] Split data into train/val/test sets
+9. [ ] Experiment with hyperparameters (embedding size, hidden size, learning rate)
+10. [ ] Sample names from the trained MLP
+11. [ ] Compare MLP loss to bigram model loss
