@@ -90,6 +90,7 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 | Date | Hours | What |
 |------|-------|------|
 | Mar 24 | 1h | Blocks 1–2: quiz, implemented embedding + MLP training (steps 1–7) |
+| Mar 25 | 1.5h | Block 3: train/val/test split, grid search over emb_dim and n_hidden (steps 8–9) |
 
 #### Block 1: Embeddings & Dataset (~25 min watch, ~1h implement)
 
@@ -114,7 +115,7 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 
 **Watch** the remaining section on evaluation and tuning. Then pause and implement:
 
-8. [ ] Split data into train/val/test sets
-9. [ ] Experiment with hyperparameters (embedding size, hidden size, learning rate)
+8. [x] Split data into train/val/test sets
+9. [x] Experiment with hyperparameters (embedding size, hidden size, learning rate)
 10. [ ] Sample names from the trained MLP
 11. [ ] Compare MLP loss to bigram model loss
