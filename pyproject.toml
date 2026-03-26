@@ -5,5 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "marimo>=0.21.1",
     "torch>=2.10.0",
+    "watchdog>=6.0.0",
 ]
+
+[tool.marimo.runtime]
+watcher_on_save = "autorun"
