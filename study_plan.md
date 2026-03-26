@@ -1,6 +1,6 @@
 # Study Plan
 
-## Lecture 2: Makemore — Character-level Language Model
+## Lecture 1: Makemore — Character-level Language Model
 
 **Video**: [The spelled-out intro to language modeling: building makemore](https://www.youtube.com/watch?v=PaCmpygFfXo) (1h57m)
 **Linear Issue**: [VY-391](https://linear.app/aisi/issue/VY-391)
@@ -38,7 +38,7 @@ This avoids passive watching while giving you enough context to code with produc
 |------|-------|------|
 | Mar 13 | 2h | Block 1: watched bigram section + implemented counting model |
 | Mar 23 | 1.75h | Block 2: quiz + implemented forward pass & training loop (steps 5–6) |
-| Mar 24 | 2h | Bug exercises, Block 2 steps 7–8, planned Lecture 3 |
+| Mar 24 | 2h | Bug exercises, Block 2 steps 7–8, planned Lecture 2 |
 
 #### Block 1: Bigram Counting Model (~40 min watch, ~1.5h implement)
 
@@ -64,7 +64,7 @@ This avoids passive watching while giving you enough context to code with produc
 
 ---
 
-## Lecture 3: Makemore — MLP (Bengio et al. 2003)
+## Lecture 2: Makemore — MLP (Bengio et al. 2003)
 
 **Video**: [Building makemore Part 2: MLP](https://www.youtube.com/watch?v=TCH_1BHY58I) (1h15m)
 **Linear Issue**: [VY-392](https://linear.app/aisi/issue/VY-392)
@@ -91,7 +91,7 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 |------|-------|------|
 | Mar 24 | 1h | Blocks 1–2: quiz, implemented embedding + MLP training (steps 1–7) |
 | Mar 25 | 1.5h | Block 3: train/val/test split, grid search over emb_dim and n_hidden (steps 8–9) |
-| Mar 26 | 0.5h | Sampling + completed Lecture 3 (steps 10–11) |
+| Mar 26 | 0.5h | Sampling + completed Lecture 2 (steps 10–11) |
 
 #### Block 1: Embeddings & Dataset (~25 min watch, ~1h implement)
 
@@ -121,7 +121,7 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 
 ---
 
-## Lecture 4: Makemore — Activations & Gradients (Pt 3)
+## Lecture 3: Makemore — Activations & Gradients
 
 **Video**: [Building makemore Part 3: Activations & Gradients, BatchNorm](https://www.youtube.com/watch?v=P6sfmUTpUmc) (1h55m)
 **Linear Issue**: [VY-393](https://linear.app/aisi/issue/VY-393)
@@ -140,7 +140,7 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 
 ### What We'll Build
 
-Starting from our lecture 3 MLP, we'll diagnose and fix training pathologies. By the end we'll have a deeper MLP with proper initialization, batch normalization, and tools to visualize what's happening inside the network during training.
+Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By the end we'll have a deeper MLP with proper initialization, batch normalization, and tools to visualize what's happening inside the network during training.
 
 ### Time Log
 
@@ -172,4 +172,4 @@ Starting from our lecture 3 MLP, we'll diagnose and fix training pathologies. By
 9. [ ] Add instrumentation: plot gradient distributions and gradient-to-data ratios per layer
 10. [ ] Diagnose tanh saturation — identify layers where activations are stuck at ±1
 11. [ ] Build a deeper MLP (e.g., 3+ hidden layers) with BN and proper init
-12. [ ] Train the deep model and compare loss to the single-hidden-layer MLP from lecture 3
+12. [ ] Train the deep model and compare loss to the single-hidden-layer MLP from lecture 2
