@@ -146,6 +146,7 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 
 | Date | Hours | What |
 |------|-------|------|
+| Mar 26 | 0.5h | Pre-lecture discussion: activation/gradient diagnostics, saturation, residual connections |
 
 #### Block 1: Initialization & Activation Statistics (~40 min watch, ~1.5h implement)
 
