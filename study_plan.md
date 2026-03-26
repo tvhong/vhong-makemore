@@ -91,6 +91,7 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 |------|-------|------|
 | Mar 24 | 1h | Blocks 1–2: quiz, implemented embedding + MLP training (steps 1–7) |
 | Mar 25 | 1.5h | Block 3: train/val/test split, grid search over emb_dim and n_hidden (steps 8–9) |
+| Mar 26 | 0.5h | Sampling + completed Lecture 3 (steps 10–11) |
 
 #### Block 1: Embeddings & Dataset (~25 min watch, ~1h implement)
 
