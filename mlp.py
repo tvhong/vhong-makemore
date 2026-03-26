@@ -90,10 +90,27 @@ def train_and_evaluate(emb_dim=2, n_hidden=100, lr=0.1, epochs=100):
     return train_losses, val_loss.item(), n_params, parameters
 
 
-# --- Experiment: grid search over emb_dim and n_hidden ---
+# --- Train best config ---
 
-print(f"{'emb_dim':>7} {'n_hidden':>8} {'params':>7} {'train':>7} {'val':>7}")
-for emb_dim in [2, 5, 10]:
-    for n_hidden in [50, 100, 200]:
-        train_losses, val_loss, n_params, _ = train_and_evaluate(emb_dim=emb_dim, n_hidden=n_hidden)
-        print(f"{emb_dim:7d} {n_hidden:8d} {n_params:7d} {train_losses[-1]:7.4f} {val_loss:7.4f}")
+train_losses, val_loss, n_params, params = train_and_evaluate(emb_dim=10, n_hidden=200)
+C, W1, b1, W2, b2 = params
+print(f"Train loss: {train_losses[-1]:.4f} | Val loss: {val_loss:.4f}")
+
+# --- Step 10: Sample names from the trained MLP ---
+
+g = torch.Generator().manual_seed(2147483647)
+for _ in range(10):
+    context = [0] * block_size
+    name = []
+    while True:
+        emb = C[torch.tensor(context)]
+        emb_cat = emb.view(1, -1)
+        h = torch.tanh(emb_cat @ W1 + b1)
+        logits = h @ W2 + b2
+        probs = torch.softmax(logits, dim=1)
+        ix = torch.multinomial(probs, num_samples=1, generator=g).item()
+        if ix == 0:
+            break
+        name.append(itos[ix])
+        context = context[1:] + [ix]
+    print("".join(name))

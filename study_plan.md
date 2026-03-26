@@ -109,13 +109,66 @@ An MLP that takes a fixed-size context window of previous characters (e.g., 3) a
 6. [x] Implement the training loop with cross-entropy loss
 7. [x] Train and check that loss decreases
 
-> **Note**: Watch the initialization section of this lecture before continuing. Weight initialization (why W2 needs to be small, why initial loss should be ~log(27)) is not yet fully understood. Key idea: large initial weights → confident wrong predictions → high initial loss → slow training.
-
 #### Block 3: Splitting, Tuning & Sampling (~25 min watch, ~1h implement)
 
 **Watch** the remaining section on evaluation and tuning. Then pause and implement:
 
 8. [x] Split data into train/val/test sets
 9. [x] Experiment with hyperparameters (embedding size, hidden size, learning rate)
-10. [ ] Sample names from the trained MLP
-11. [ ] Compare MLP loss to bigram model loss
+10. [x] Sample names from the trained MLP
+11. [x] Compare MLP loss to bigram model loss
+
+---
+
+## Lecture 4: Makemore — Activations & Gradients (Pt 3)
+
+**Video**: [Building makemore Part 3: Activations & Gradients, BatchNorm](https://www.youtube.com/watch?v=P6sfmUTpUmc) (1h55m)
+**Linear Issue**: [VY-393](https://linear.app/aisi/issue/VY-393)
+**Due**: Mar 29, 2026
+**Est. Hours**: 6h
+
+### Key Concepts
+
+- Why initialization matters (too-confident initial predictions destroy learning)
+- Kaiming initialization (scaling weights by fan-in)
+- Activation statistics: monitoring distribution of hidden layer outputs
+- Gradient flow: saturated tanh → dead gradients → slow learning
+- Batch normalization: normalize pre-activations to be unit Gaussian
+- BN during training vs inference (running mean/variance)
+- Diagnostic tools: plotting activation/gradient distributions per layer
+
+### What We'll Build
+
+Starting from our lecture 3 MLP, we'll diagnose and fix training pathologies. By the end we'll have a deeper MLP with proper initialization, batch normalization, and tools to visualize what's happening inside the network during training.
+
+### Time Log
+
+| Date | Hours | What |
+|------|-------|------|
+
+#### Block 1: Initialization & Activation Statistics (~40 min watch, ~1.5h implement)
+
+**Watch** the first ~40 minutes, covering why the initial loss is too high and how initialization affects training. Then pause and implement:
+
+1. [ ] Diagnose the initial loss problem — compute what the loss *should* be at initialization (uniform predictions → -log(1/27)) and check how far off we are
+2. [ ] Fix output layer initialization so initial loss is close to -log(1/27)
+3. [ ] Fix hidden layer initialization using Kaiming init (scale W1 by `(fan_in)**-0.5`)
+4. [ ] Add instrumentation: plot activation distributions (histograms of tanh outputs per layer)
+
+#### Block 2: Batch Normalization (~40 min watch, ~1.5h implement)
+
+**Watch** the next ~40 minutes, covering batch normalization mechanics. Then pause and implement:
+
+5. [ ] Implement batch normalization layer: normalize pre-activations to zero mean, unit variance
+6. [ ] Add learnable scale (gamma) and shift (beta) parameters to BN
+7. [ ] Track running mean and running variance during training (for inference)
+8. [ ] Switch to running stats at eval time and verify val loss is consistent
+
+#### Block 3: Gradient Flow & Deeper Networks (~35 min watch, ~1.5h implement)
+
+**Watch** the remaining section on gradient diagnostics and going deeper. Then pause and implement:
+
+9. [ ] Add instrumentation: plot gradient distributions and gradient-to-data ratios per layer
+10. [ ] Diagnose tanh saturation — identify layers where activations are stuck at ±1
+11. [ ] Build a deeper MLP (e.g., 3+ hidden layers) with BN and proper init
+12. [ ] Train the deep model and compare loss to the single-hidden-layer MLP from lecture 3
