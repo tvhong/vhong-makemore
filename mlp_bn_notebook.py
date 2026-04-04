@@ -73,12 +73,14 @@ def _(block_size, mo, torch, vocab_size):
     b1 = torch.zeros(n_hidden, requires_grad=True)
     W2 = torch.randn((n_hidden, vocab_size), generator=g, requires_grad=True) * 0.01
     b2 = torch.zeros(vocab_size, requires_grad=True)
+    bn_gain = torch.ones((1, n_hidden), requires_grad=True)
+    bn_bias = torch.zeros((1, n_hidden), requires_grad=True)
 
-    parameters = [C, W1, b1, W2, b2]
+    parameters = [C, W1, b1, W2, b2, bn_gain, bn_bias]
     n_params = sum(p.numel() for p in parameters)
 
     mo.md(f"**Number of parameters:** {n_params}")
-    return C, W1, W2, b1, b2, emb_dim
+    return C, W1, W2, b1, b2, bn_bias, bn_gain, emb_dim
 
 
 @app.cell
@@ -90,6 +92,8 @@ def _(
     b1,
     b2,
     block_size,
+    bn_bias,
+    bn_gain,
     emb_dim,
     mo,
     torch,
@@ -102,7 +106,12 @@ def _(
 
     emb = C[xs_train]
     emb_cat = emb.view(-1, block_size * emb_dim)
-    h = torch.tanh(emb_cat @ W1 + b1)
+    h_preact = emb_cat @ W1 + b1
+
+    # Batch normalization
+    h_preact = bn_gain * (h_preact - h_preact.mean(0, keepdim=True)) / (h_preact.std(0, keepdim=True) + 1e-5) + bn_bias
+
+    h = torch.tanh(h_preact)
     logits = h @ W2 + b2
     actual_loss = F.cross_entropy(logits, ys_train).item()
 

@@ -152,10 +152,10 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 
 **Watch** the first ~40 minutes, covering why the initial loss is too high and how initialization affects training. Then pause and implement:
 
-1. [ ] Diagnose the initial loss problem — compute what the loss *should* be at initialization (uniform predictions → -log(1/27)) and check how far off we are
-2. [ ] Fix output layer initialization so initial loss is close to -log(1/27)
-3. [ ] Fix hidden layer initialization using Kaiming init (scale W1 by `(fan_in)**-0.5`)
-4. [ ] Add instrumentation: plot activation distributions (histograms of tanh outputs per layer)
+1. [x] Diagnose the initial loss problem — compute what the loss *should* be at initialization (uniform predictions → -log(1/27)) and check how far off we are
+2. [x] Fix output layer initialization so initial loss is close to -log(1/27)
+3. [x] Fix hidden layer initialization using Kaiming init (scale W1 by `(fan_in)**-0.5`)
+4. [x] Add instrumentation: plot activation distributions (histograms of tanh outputs per layer)
 
 #### Block 2: Batch Normalization (~40 min watch, ~1.5h implement)
 
