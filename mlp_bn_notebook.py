@@ -76,11 +76,14 @@ def _(block_size, mo, torch, vocab_size):
     bn_gain = torch.ones((1, n_hidden), requires_grad=True)
     bn_bias = torch.zeros((1, n_hidden), requires_grad=True)
 
+    bn_mean_running = torch.zeros((1, n_hidden))
+    bn_std_running = torch.ones((1, n_hidden))
+
     parameters = [C, W1, b1, W2, b2, bn_gain, bn_bias]
     n_params = sum(p.numel() for p in parameters)
 
     mo.md(f"**Number of parameters:** {n_params}")
-    return C, W1, W2, b1, b2, bn_bias, bn_gain, emb_dim
+    return C, W1, W2, b1, b2, bn_bias, bn_gain, bn_mean_running, bn_std_running, emb_dim
 
 
 @app.cell
@@ -109,7 +112,14 @@ def _(
     h_preact = emb_cat @ W1 + b1
 
     # Batch normalization
-    h_preact = bn_gain * (h_preact - h_preact.mean(0, keepdim=True)) / (h_preact.std(0, keepdim=True) + 1e-5) + bn_bias
+    bn_mean = h_preact.mean(0, keepdim=True)
+    bn_std = h_preact.std(0, keepdim=True)
+    h_preact = bn_gain * (h_preact - bn_mean) / (bn_std + 1e-5) + bn_bias
+
+    # Update running stats
+    with torch.no_grad():
+        bn_mean_running = 0.999 * bn_mean_running + 0.001 * bn_mean
+        bn_std_running = 0.999 * bn_std_running + 0.001 * bn_std
 
     h = torch.tanh(h_preact)
     logits = h @ W2 + b2

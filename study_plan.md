@@ -147,6 +147,7 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 | Date | Hours | What |
 |------|-------|------|
 | Mar 26 | 0.5h | Pre-lecture discussion: activation/gradient diagnostics, saturation, residual connections |
+| Apr 4 | 1.5h | Block 1 review, Block 2 quiz + implemented BN with gamma/beta and running stats (steps 5–8) |
 
 #### Block 1: Initialization & Activation Statistics (~40 min watch, ~1.5h implement)
 
@@ -161,10 +162,10 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 
 **Watch** the next ~40 minutes, covering batch normalization mechanics. Then pause and implement:
 
-5. [ ] Implement batch normalization layer: normalize pre-activations to zero mean, unit variance
-6. [ ] Add learnable scale (gamma) and shift (beta) parameters to BN
-7. [ ] Track running mean and running variance during training (for inference)
-8. [ ] Switch to running stats at eval time and verify val loss is consistent
+5. [x] Implement batch normalization layer: normalize pre-activations to zero mean, unit variance
+6. [x] Add learnable scale (gamma) and shift (beta) parameters to BN
+7. [x] Track running mean and running variance during training (for inference)
+8. [x] Switch to running stats at eval time and verify val loss is consistent
 
 #### Block 3: Gradient Flow & Deeper Networks (~35 min watch, ~1.5h implement)
 
