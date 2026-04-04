@@ -68,7 +68,8 @@ def _(block_size, mo, torch, vocab_size):
 
     g = torch.Generator().manual_seed(2147483647)
     C = torch.randn((vocab_size, emb_dim), generator=g, requires_grad=True)
-    W1 = torch.randn((block_size * emb_dim, n_hidden), generator=g, requires_grad=True)
+    fan_in = block_size * emb_dim
+    W1 = torch.randn((fan_in, n_hidden), generator=g, requires_grad=True) * fan_in**-0.5
     b1 = torch.zeros(n_hidden, requires_grad=True)
     W2 = torch.randn((n_hidden, vocab_size), generator=g, requires_grad=True) * 0.01
     b2 = torch.zeros(vocab_size, requires_grad=True)
