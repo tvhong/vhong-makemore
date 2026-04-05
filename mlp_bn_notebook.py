@@ -177,7 +177,7 @@ def _(
     # --- Training loop ---
     _max_steps = 2000
     _batch_size = 32
-    _lr = 0.1
+    _lr = 0.01
     _lossi = []
 
     # Track update-to-data ratios per layer over time
@@ -223,7 +223,7 @@ def _(
     _ax.set_title("Training loss")
 
     mo.vstack([_fig, mo.md(f"**Final training loss: {_lossi[-1]:.4f}**")])
-    return
+    return (ud_ratios,)
 
 
 @app.cell
@@ -249,7 +249,7 @@ def _(C, F, block_size, emb_dim, layers, mo, xs_val, ys_val):
 
 
 @app.cell
-def _(layers, mo, plt, torch):
+def _(layers, mo, plt, torch, ud_ratios):
     # --- Activation & gradient diagnostics ---
     _tanh_layers = [_l for _l in layers if isinstance(_l, type(layers[2]))]
 
@@ -266,26 +266,30 @@ def _(layers, mo, plt, torch):
     # Plot gradient distributions
     _linear_layers = [_l for _l in layers if hasattr(_l, "weight")]
     _fig2, _axes2 = plt.subplots(1, len(_linear_layers), figsize=(4 * len(_linear_layers), 4))
-    _ratios = []
     for _i, _ll in enumerate(_linear_layers):
         _ax = _axes2[_i] if len(_linear_layers) > 1 else _axes2
         _grad = _ll.weight.grad.detach()
         _ax.hist(_grad.view(-1).numpy(), bins=50, color="salmon", edgecolor="black")
         _ratio = _grad.std() / _ll.weight.data.std()
-        _ratios.append(_ratio.item())
         _ax.set_title(f"Linear {_i}: grad/data = {_ratio:.4f}")
         _ax.set_xlabel("gradient value")
+
+    # Plot update-to-data ratio over time
+    _fig3, _ax3 = plt.subplots(figsize=(10, 4))
+    for _i in ud_ratios:
+        _ax3.plot(ud_ratios[_i], label=f"Linear {_i}")
+    _ax3.set_xlabel("step")
+    _ax3.set_ylabel("log10(update/data ratio)")
+    _ax3.set_title("Update-to-data ratio over training")
+    _ax3.axhline(y=-3, color="black", linestyle="--", label="~1e-3 target")
+    _ax3.legend()
 
     _fig1.suptitle("Activation distributions per Tanh layer")
     _fig2.suptitle("Gradient distributions per Linear layer")
     _fig1.tight_layout()
     _fig2.tight_layout()
 
-    mo.vstack([
-        _fig1,
-        _fig2,
-        mo.md(f"**Update-to-data ratios:** {['%.4f' % _r for _r in _ratios]}"),
-    ])
+    mo.vstack([_fig1, _fig2, _fig3])
     return
 
 
