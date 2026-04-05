@@ -151,11 +151,45 @@ def _(C, W1, W2, Xtr, Ytr, b1, b2, bnbias, bngain, torch):
     loss.backward()
 
     print(f"loss: {loss.item():.4f}")
-    return Yb, counts, counts_sum, counts_sum_inv, logprobs, n, probs
+    return (
+        Yb,
+        bnraw,
+        counts,
+        counts_sum,
+        counts_sum_inv,
+        h,
+        hpreact,
+        logit_maxes,
+        logits,
+        logprobs,
+        n,
+        norm_logits,
+        probs,
+    )
 
 
 @app.cell
-def _(Yb, cmp, counts, counts_sum, counts_sum_inv, logprobs, n, probs, torch):
+def _(
+    W2,
+    Yb,
+    b2,
+    bnbias,
+    bngain,
+    bnraw,
+    cmp,
+    counts,
+    counts_sum,
+    counts_sum_inv,
+    h,
+    hpreact,
+    logit_maxes,
+    logits,
+    logprobs,
+    n,
+    norm_logits,
+    probs,
+    torch,
+):
     # ============================================================
     # Exercise 1: backprop through the whole thing manually
     # backpropagating through every variable one at a time
@@ -182,6 +216,39 @@ def _(Yb, cmp, counts, counts_sum, counts_sum_inv, logprobs, n, probs, torch):
     # counts_sum = counts.sum(1, keepdims=True)
     dcounts += torch.ones_like(counts) * dcounts_sum
     cmp("counts", dcounts, counts)
+
+    # counts = norm_logits.exp()
+    dnorm_logits = counts * dcounts
+    cmp("norm_logits", dnorm_logits, norm_logits)
+
+    # norm_logits = logits - logit_maxes
+    dlogits = dnorm_logits.clone()
+    dlogit_maxes = (-dnorm_logits).sum(1, keepdim=True)
+    cmp("logit_maxes", dlogit_maxes, logit_maxes)
+
+    # logit_maxes = logits.max(1, keepdim=True).values
+    dlogits += (logits == logit_maxes) * dlogit_maxes
+    cmp("logits", dlogits, logits)
+
+    # logits = h @ W2 + b2
+    dh = dlogits @ W2.T
+    dW2 = h.T @ dlogits
+    db2 = dlogits.sum(0)
+    cmp("h", dh, h)
+    cmp("W2", dW2, W2)
+    cmp("b2", db2, b2)
+
+    # h = torch.tanh(hpreact)
+    dhpreact = (1 - h ** 2) * dh
+    cmp("hpreact", dhpreact, hpreact)
+
+    # hpreact = bngain * bnraw + bnbias
+    dbngain = (bnraw * dhpreact).sum(0, keepdim=True)
+    dbnraw = bngain * dhpreact
+    dbnbias = dhpreact.sum(0, keepdim=True)
+    cmp("bngain", dbngain, bngain)
+    cmp("bnraw", dbnraw, bnraw)
+    cmp("bnbias", dbnbias, bnbias)
 
     # YOUR CODE: continue backwards from here...
     return
