@@ -177,7 +177,7 @@ def _(
     # --- Training loop ---
     _max_steps = 2000
     _batch_size = 32
-    _lr = 0.01
+    _lr = 0.012
     _lossi = []
 
     # Track update-to-data ratios per layer over time
@@ -259,7 +259,7 @@ def _(layers, mo, plt, torch, ud_ratios):
         _ax = _axes1[_i] if len(_tanh_layers) > 1 else _axes1
         _h = _tl.out.detach()
         _ax.hist(_h.view(-1).numpy(), bins=50, color="steelblue", edgecolor="black")
-        _sat_pct = (torch.abs(_h) > 0.99).float().mean().item() * 100
+        _sat_pct = (torch.abs(_h) >= 0.95).float().mean().item() * 100
         _ax.set_title(f"Layer {_i}: {_sat_pct:.1f}% saturated")
         _ax.set_xlabel("tanh output")
 
@@ -290,6 +290,11 @@ def _(layers, mo, plt, torch, ud_ratios):
     _fig2.tight_layout()
 
     mo.vstack([_fig1, _fig2, _fig3])
+    return
+
+
+@app.cell
+def _():
     return
 
 
