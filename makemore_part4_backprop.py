@@ -152,13 +152,22 @@ def _(C, W1, W2, Xtr, Ytr, b1, b2, bnbias, bngain, torch):
 
     print(f"loss: {loss.item():.4f}")
     return (
+        Xb,
         Yb,
+        bndiff,
+        bndiff2,
+        bnmeani,
         bnraw,
+        bnvar,
+        bnvar_inv,
         counts,
         counts_sum,
         counts_sum_inv,
+        emb,
+        embcat,
         h,
         hpreact,
+        hprebn,
         logit_maxes,
         logits,
         logprobs,
@@ -170,18 +179,30 @@ def _(C, W1, W2, Xtr, Ytr, b1, b2, bnbias, bngain, torch):
 
 @app.cell
 def _(
+    C,
+    W1,
     W2,
+    Xb,
     Yb,
+    b1,
     b2,
+    bndiff,
+    bndiff2,
     bnbias,
     bngain,
+    bnmeani,
     bnraw,
+    bnvar,
+    bnvar_inv,
     cmp,
     counts,
     counts_sum,
     counts_sum_inv,
+    emb,
+    embcat,
     h,
     hpreact,
+    hprebn,
     logit_maxes,
     logits,
     logprobs,
@@ -250,7 +271,48 @@ def _(
     cmp("bnraw", dbnraw, bnraw)
     cmp("bnbias", dbnbias, bnbias)
 
-    # YOUR CODE: continue backwards from here...
+    # bnraw = bndiff * bnvar_inv
+    dbndiff = dbnraw * bnvar_inv
+    dbnvar_inv = (bndiff * dbnraw).sum(0, keepdim=True)
+    cmp("bnvar_inv", dbnvar_inv, bnvar_inv)
+
+    # bnvar_inv = (bnvar + 1e-5) ** -0.5
+    dbnvar = -0.5 * (bnvar + 1e-5) ** -1.5 * dbnvar_inv
+    cmp("bnvar", dbnvar, bnvar)
+
+    # bnvar = 1/(n-1) * bndiff2.sum(0, keepdim=True)
+    dbndiff2 = 1.0 / (n - 1) * dbnvar * torch.ones_like(bndiff2)
+    cmp("bndiff2", dbndiff2, bndiff2)
+
+    # bndiff2 = bndiff ** 2
+    dbndiff += 2 * bndiff * dbndiff2
+    cmp("bndiff", dbndiff, bndiff)
+
+    # bndiff = hprebn - bnmeani
+    dhprebn = dbndiff.clone()
+    dbnmeani = (-dbndiff).sum(0, keepdim=True)
+    cmp("bnmeani", dbnmeani, bnmeani)
+
+    # bnmeani = 1/n * hprebn.sum(0, keepdim=True)
+    dhprebn += 1.0 / n * dbnmeani * torch.ones_like(hprebn)
+    cmp("hprebn", dhprebn, hprebn)
+
+    # hprebn = embcat @ W1 + b1
+    dembcat = dhprebn @ W1.T
+    dW1 = embcat.T @ dhprebn
+    db1 = dhprebn.sum(0)
+    cmp("embcat", dembcat, embcat)
+    cmp("W1", dW1, W1)
+    cmp("b1", db1, b1)
+
+    # embcat = emb.view(emb.shape[0], -1)
+    demb = dembcat.view(emb.shape)
+    cmp("emb", demb, emb)
+
+    # emb = C[Xb]
+    dC = torch.zeros_like(C)
+    dC.index_add_(0, Xb.view(-1), demb.view(-1, emb.shape[2]))
+    cmp("C", dC, C)
     return
 
 

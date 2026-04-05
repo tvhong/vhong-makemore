@@ -206,29 +206,30 @@ This lecture is exercise-centric. Karpathy recommends working through the exerci
 
 | Date | Hours | What |
 |------|-------|------|
+| Apr 5 | 3h10m | Exercise 1: completed all manual backprop gradients (cross-entropy → logits → linear layer 2 → tanh → batchnorm affine → bnraw → bnvar → bndiff → linear layer 1 → embedding) |
 
 #### Block 1: Setup & Cross-Entropy Backward (~30 min watch, ~1.5h implement)
 
 **Watch** the intro and starter code setup. Then work through the exercises:
 
-1. [ ] Set up the forward pass with atomic operations (matching Karpathy's starter code)
-2. [ ] Backprop through cross-entropy loss: gradient of logits from softmax + negative log likelihood
-3. [ ] Verify gradients match `loss.backward()` using `torch.allclose`
+1. [x] Set up the forward pass with atomic operations (matching Karpathy's starter code)
+2. [x] Backprop through cross-entropy loss: gradient of logits from softmax + negative log likelihood
+3. [x] Verify gradients match `loss.backward()` using `torch.allclose`
 
 #### Block 2: Batch Norm Backward (~40 min watch, ~2h implement)
 
 **Watch** the batch norm section and Bessel's correction digression. Then implement:
 
-4. [ ] Backprop through the second linear layer (W2, b2)
-5. [ ] Backprop through tanh activation
-6. [ ] Backprop through batch normalization (the hardest part — mean, variance, normalization, gamma, beta)
-7. [ ] Understand Bessel's correction: why `torch.var` uses N-1 by default and how it affects the gradient
+4. [x] Backprop through the second linear layer (W2, b2)
+5. [x] Backprop through tanh activation
+6. [x] Backprop through batch normalization (the hardest part — mean, variance, normalization, gamma, beta)
+7. [x] Understand Bessel's correction: why `torch.var` uses N-1 by default and how it affects the gradient
 
 #### Block 3: First Layer & Fused Operations (~30 min watch, ~1h implement)
 
 **Watch** the remaining section on completing the backward pass and fusing operations. Then implement:
 
-8. [ ] Backprop through the first linear layer (W1, b1) and embedding lookup
+8. [x] Backprop through the first linear layer (W1, b1) and embedding lookup
 9. [ ] Fuse the cross-entropy backward pass into a single efficient formula
 10. [ ] Fuse the batch norm backward pass into a single formula
 11. [ ] Run a full training loop using only manual gradients and verify it trains correctly
