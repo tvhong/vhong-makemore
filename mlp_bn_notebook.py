@@ -10,8 +10,9 @@ def _():
     import torch
     import torch.nn.functional as F
     import random
+    import matplotlib.pyplot as plt
 
-    return F, mo, random, torch
+    return F, mo, plt, random, torch
 
 
 @app.cell
@@ -57,117 +58,224 @@ def _(mo, random, torch):
         - Test: {xs_test.shape[0]} examples
         """
     )
-    return block_size, vocab_size, xs_train, ys_train
+    return block_size, vocab_size, xs_train, xs_val, ys_train, ys_val
 
 
 @app.cell
-def _(block_size, mo, torch, vocab_size):
-    # --- Initialize network ---
+def _(torch):
+    # --- Module classes ---
+
+    class Linear:
+        def __init__(self, fan_in, fan_out, bias=True, generator=None):
+            self.weight = torch.randn((fan_in, fan_out), generator=generator) * fan_in**0.5
+            self.bias = torch.zeros(fan_out) if bias else None
+
+        def __call__(self, x):
+            self.out = x @ self.weight
+            if self.bias is not None:
+                self.out += self.bias
+            return self.out
+
+        def parameters(self):
+            return [self.weight] + ([] if self.bias is None else [self.bias])
+
+    class BatchNorm1d:
+        def __init__(self, dim, eps=1e-5, momentum=0.001):
+            self.eps = eps
+            self.momentum = momentum
+            self.training = True
+            # Learnable parameters
+            self.gamma = torch.ones(dim)
+            self.beta = torch.zeros(dim)
+            # Running stats (not learned)
+            self.running_mean = torch.zeros(dim)
+            self.running_var = torch.ones(dim)
+
+        def __call__(self, x):
+            if self.training:
+                mean = x.mean(0, keepdim=True)
+                var = x.var(0, keepdim=True)
+            else:
+                mean = self.running_mean
+                var = self.running_var
+
+            x_hat = (x - mean) / torch.sqrt(var + self.eps)
+            self.out = self.gamma * x_hat + self.beta
+
+            # Update running stats
+            if self.training:
+                with torch.no_grad():
+                    self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * mean
+                    self.running_var = (1 - self.momentum) * self.running_var + self.momentum * var
+
+            return self.out
+
+        def parameters(self):
+            return [self.gamma, self.beta]
+
+    class Tanh:
+        def __call__(self, x):
+            self.out = torch.tanh(x)
+            return self.out
+
+        def parameters(self):
+            return []
+
+    return BatchNorm1d, Linear, Tanh
+
+
+@app.cell
+def _(BatchNorm1d, Linear, Tanh, block_size, mo, torch, vocab_size):
+    # --- Build deep network ---
     emb_dim = 10
     n_hidden = 200
+    n_layers = 3
 
-    g = torch.Generator().manual_seed(2147483647)
-    C = torch.randn((vocab_size, emb_dim), generator=g, requires_grad=True)
-    fan_in = block_size * emb_dim
-    W1 = torch.randn((fan_in, n_hidden), generator=g, requires_grad=True) * fan_in**-0.5
-    b1 = torch.zeros(n_hidden, requires_grad=True)
-    W2 = torch.randn((n_hidden, vocab_size), generator=g, requires_grad=True) * 0.01
-    b2 = torch.zeros(vocab_size, requires_grad=True)
-    bn_gain = torch.ones((1, n_hidden), requires_grad=True)
-    bn_bias = torch.zeros((1, n_hidden), requires_grad=True)
+    g_init = torch.Generator().manual_seed(2147483647)
+    C = torch.randn((vocab_size, emb_dim), generator=g_init)
 
-    bn_mean_running = torch.zeros((1, n_hidden))
-    bn_std_running = torch.ones((1, n_hidden))
+    layers = []
+    # First hidden layer: input is flattened embeddings
+    layers.append(Linear(block_size * emb_dim, n_hidden, bias=False, generator=g_init))
+    layers.append(BatchNorm1d(n_hidden))
+    layers.append(Tanh())
+    # Additional hidden layers
+    for _ in range(n_layers - 1):
+        layers.append(Linear(n_hidden, n_hidden, bias=False, generator=g_init))
+        layers.append(BatchNorm1d(n_hidden))
+        layers.append(Tanh())
+    # Output layer
+    layers.append(Linear(n_hidden, vocab_size, generator=g_init))
 
-    parameters = [C, W1, b1, W2, b2, bn_gain, bn_bias]
+    # Collect all parameters
+    C.requires_grad = True
+    parameters = [C]
+    for layer_init in layers:
+        for p_init in layer_init.parameters():
+            p_init.requires_grad = True
+            parameters.append(p_init)
+
     n_params = sum(p.numel() for p in parameters)
-
-    mo.md(f"**Number of parameters:** {n_params}")
-    return C, W1, W2, b1, b2, bn_bias, bn_gain, bn_mean_running, bn_std_running, emb_dim
+    mo.md(f"**Deep MLP: {n_layers} hidden layers, {n_params} parameters**")
+    return C, emb_dim, layers, parameters
 
 
 @app.cell
 def _(
     C,
     F,
-    W1,
-    W2,
-    b1,
-    b2,
     block_size,
-    bn_bias,
-    bn_gain,
     emb_dim,
+    layers,
     mo,
+    parameters,
+    plt,
     torch,
-    vocab_size,
     xs_train,
     ys_train,
 ):
-    # --- Step 1: Diagnose initial loss ---
-    expected_loss = -torch.log(torch.tensor(1.0 / vocab_size)).item()
+    # --- Training loop ---
+    _max_steps = 20000
+    _batch_size = 32
+    _lr = 0.1
+    _lossi = []
 
-    emb = C[xs_train]
-    emb_cat = emb.view(-1, block_size * emb_dim)
-    h_preact = emb_cat @ W1 + b1
+    _g = torch.Generator().manual_seed(42)
 
-    # Batch normalization
-    bn_mean = h_preact.mean(0, keepdim=True)
-    bn_std = h_preact.std(0, keepdim=True)
-    h_preact = bn_gain * (h_preact - bn_mean) / (bn_std + 1e-5) + bn_bias
+    for _i in range(_max_steps):
+        # Mini-batch
+        _ix = torch.randint(0, xs_train.shape[0], (_batch_size,), generator=_g)
+        _xb, _yb = xs_train[_ix], ys_train[_ix]
 
-    # Update running stats
-    with torch.no_grad():
-        bn_mean_running = 0.999 * bn_mean_running + 0.001 * bn_mean
-        bn_std_running = 0.999 * bn_std_running + 0.001 * bn_std
+        # Forward pass
+        _emb = C[_xb]
+        _x = _emb.view(-1, block_size * emb_dim)
+        for _layer in layers:
+            _x = _layer(_x)
+        _loss = F.cross_entropy(_x, _yb)
 
-    h = torch.tanh(h_preact)
-    logits = h @ W2 + b2
-    actual_loss = F.cross_entropy(logits, ys_train).item()
+        # Backward pass
+        for _p in parameters:
+            _p.grad = None
+        _loss.backward()
 
-    mo.md(
-        f"""
-        **Step 1: Diagnose initial loss**
+        # Update — decay learning rate after 10k steps
+        _lr_current = _lr if _i < 10000 else 0.01
+        for _p in parameters:
+            _p.data += -_lr_current * _p.grad
 
-        Expected initial loss (uniform predictions): **{expected_loss:.4f}**
+        _lossi.append(_loss.log10().item())
 
-        Actual initial loss: **{actual_loss:.4f}**
-        """
-    )
-    return (h,)
+    _fig, _ax = plt.subplots(figsize=(10, 4))
+    _ax.plot(_lossi)
+    _ax.set_xlabel("step")
+    _ax.set_ylabel("log10(loss)")
+    _ax.set_title("Training loss")
 
-
-@app.cell
-def _(h, mo, torch):
-    import matplotlib.pyplot as plt
-
-    # --- Histogram of tanh activations ---
-    fig1, ax1 = plt.subplots(figsize=(10, 4))
-    h_flat = h.detach().view(-1).numpy()
-    ax1.hist(h_flat, bins=50, color="steelblue", edgecolor="black")
-    ax1.set_title("Hidden layer activation distribution")
-    ax1.set_xlabel("tanh output")
-    ax1.set_ylabel("count")
-
-    # --- Saturation map ---
-    fig2, ax2 = plt.subplots(figsize=(10, 4))
-    saturated = (torch.abs(h.detach()) > 0.99).float().numpy()
-    ax2.imshow(saturated[:10, :50].T, cmap="gray_r", aspect="auto")
-    ax2.set_title("Saturation map (black = |tanh| > 0.99)")
-    ax2.set_xlabel("example")
-    ax2.set_ylabel("neuron")
-
-    frac_saturated = saturated.mean() * 100
-    mo.vstack([
-        fig1,
-        fig2,
-        mo.md(f"**{frac_saturated:.1f}%** of activations are saturated (|tanh| > 0.99)"),
-    ])
+    mo.vstack([_fig, mo.md(f"**Final training loss: {_lossi[-1]:.4f}**")])
     return
 
 
 @app.cell
-def _():
+def _(C, F, block_size, emb_dim, layers, mo, xs_val, ys_val):
+    # --- Evaluate on val set using running stats ---
+    for _layer in layers:
+        if hasattr(_layer, "training"):
+            _layer.training = False
+
+    _emb = C[xs_val]
+    _x = _emb.view(-1, block_size * emb_dim)
+    for _layer in layers:
+        _x = _layer(_x)
+    _val_loss = F.cross_entropy(_x, ys_val).item()
+
+    # Set back to training mode
+    for _layer in layers:
+        if hasattr(_layer, "training"):
+            _layer.training = True
+
+    mo.md(f"**Validation loss: {_val_loss:.4f}**")
+    return
+
+
+@app.cell
+def _(layers, mo, plt, torch):
+    # --- Activation & gradient diagnostics ---
+    _tanh_layers = [_l for _l in layers if isinstance(_l, type(layers[2]))]
+
+    # Plot activation distributions
+    _fig1, _axes1 = plt.subplots(1, len(_tanh_layers), figsize=(4 * len(_tanh_layers), 4))
+    for _i, _tl in enumerate(_tanh_layers):
+        _ax = _axes1[_i] if len(_tanh_layers) > 1 else _axes1
+        _h = _tl.out.detach()
+        _ax.hist(_h.view(-1).numpy(), bins=50, color="steelblue", edgecolor="black")
+        _sat_pct = (torch.abs(_h) > 0.99).float().mean().item() * 100
+        _ax.set_title(f"Layer {_i}: {_sat_pct:.1f}% saturated")
+        _ax.set_xlabel("tanh output")
+
+    # Plot gradient distributions
+    _linear_layers = [_l for _l in layers if hasattr(_l, "weight")]
+    _fig2, _axes2 = plt.subplots(1, len(_linear_layers), figsize=(4 * len(_linear_layers), 4))
+    _ratios = []
+    for _i, _ll in enumerate(_linear_layers):
+        _ax = _axes2[_i] if len(_linear_layers) > 1 else _axes2
+        _grad = _ll.weight.grad.detach()
+        _ax.hist(_grad.view(-1).numpy(), bins=50, color="salmon", edgecolor="black")
+        _ratio = _grad.std() / _ll.weight.data.std()
+        _ratios.append(_ratio.item())
+        _ax.set_title(f"Linear {_i}: grad/data = {_ratio:.4f}")
+        _ax.set_xlabel("gradient value")
+
+    _fig1.suptitle("Activation distributions per Tanh layer")
+    _fig2.suptitle("Gradient distributions per Linear layer")
+    _fig1.tight_layout()
+    _fig2.tight_layout()
+
+    mo.vstack([
+        _fig1,
+        _fig2,
+        mo.md(f"**Update-to-data ratios:** {['%.4f' % _r for _r in _ratios]}"),
+    ])
     return
 
 
