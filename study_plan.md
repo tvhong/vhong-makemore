@@ -176,3 +176,59 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 10. [x] Diagnose tanh saturation — identify layers where activations are stuck at ±1
 11. [x] Build a deeper MLP (e.g., 3+ hidden layers) with BN and proper init
 12. [ ] Train the deep model and compare loss to the single-hidden-layer MLP from lecture 2
+
+---
+
+## Lecture 4: Makemore — Becoming a Backprop Ninja
+
+**Video**: [Building makemore Part 4: Becoming a Backprop Ninja](https://www.youtube.com/watch?v=q8SA3rM6ckI) (1h56m)
+**Due**: Apr 5, 2026
+**Est. Hours**: 6h
+
+### Key Concepts
+
+- Manual backpropagation through tensor operations (not scalar like micrograd)
+- Deriving gradients for cross-entropy loss, matrix multiply, tanh, batch norm
+- Understanding shapes: each gradient has the same shape as its corresponding tensor
+- Bessel's correction in batch norm (dividing by N-1 vs N)
+- Fusing operations: collapsing many atomic gradients into a single efficient formula
+- Building intuition for how gradients flow through a compute graph
+
+### What We'll Build
+
+Starting from the forward pass of our 2-layer MLP with batch norm, we'll manually implement the backward pass for every operation — replacing `loss.backward()` with our own gradient computations. We verify correctness by comparing against PyTorch's autograd at each step.
+
+### Format Note
+
+This lecture is exercise-centric. Karpathy recommends working through the exercises yourself and using the video when stuck, rather than watching passively. Our approach: attempt each exercise first, then check the video if stuck.
+
+### Time Log
+
+| Date | Hours | What |
+|------|-------|------|
+
+#### Block 1: Setup & Cross-Entropy Backward (~30 min watch, ~1.5h implement)
+
+**Watch** the intro and starter code setup. Then work through the exercises:
+
+1. [ ] Set up the forward pass with atomic operations (matching Karpathy's starter code)
+2. [ ] Backprop through cross-entropy loss: gradient of logits from softmax + negative log likelihood
+3. [ ] Verify gradients match `loss.backward()` using `torch.allclose`
+
+#### Block 2: Batch Norm Backward (~40 min watch, ~2h implement)
+
+**Watch** the batch norm section and Bessel's correction digression. Then implement:
+
+4. [ ] Backprop through the second linear layer (W2, b2)
+5. [ ] Backprop through tanh activation
+6. [ ] Backprop through batch normalization (the hardest part — mean, variance, normalization, gamma, beta)
+7. [ ] Understand Bessel's correction: why `torch.var` uses N-1 by default and how it affects the gradient
+
+#### Block 3: First Layer & Fused Operations (~30 min watch, ~1h implement)
+
+**Watch** the remaining section on completing the backward pass and fusing operations. Then implement:
+
+8. [ ] Backprop through the first linear layer (W1, b1) and embedding lookup
+9. [ ] Fuse the cross-entropy backward pass into a single efficient formula
+10. [ ] Fuse the batch norm backward pass into a single formula
+11. [ ] Run a full training loop using only manual gradients and verify it trains correctly
