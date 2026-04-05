@@ -175,7 +175,7 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 9. [x] Add instrumentation: plot gradient distributions and gradient-to-data ratios per layer
 10. [x] Diagnose tanh saturation — identify layers where activations are stuck at ±1
 11. [x] Build a deeper MLP (e.g., 3+ hidden layers) with BN and proper init
-12. [ ] Train the deep model and compare loss to the single-hidden-layer MLP from lecture 2
+12. ~~Train the deep model and compare loss to the single-hidden-layer MLP from lecture 2~~ (skipped)
 
 ---
 
