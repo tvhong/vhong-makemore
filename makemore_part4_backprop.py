@@ -12,7 +12,7 @@ def _():
     import matplotlib.pyplot as plt
     import random
 
-    return F, mo, plt, random, torch
+    return mo, random, torch
 
 
 @app.cell
@@ -56,7 +56,7 @@ def _(mo, random, torch):
         - Test: {Xte.shape[0]} examples
         """
     )
-    return Xdev, Xte, Xtr, Ydev, Yte, Ytr, block_size, build_dataset, itos, stoi, vocab_size
+    return Xtr, Ytr, block_size, vocab_size
 
 
 @app.cell
@@ -98,11 +98,11 @@ def _(block_size, mo, torch, vocab_size):
 
     _n_params = sum(p.nelement() for p in parameters)
     mo.md(f"**Parameters:** {_n_params}")
-    return C, W1, W2, b1, b2, bngain, bnbias, n_embd, n_hidden, parameters
+    return C, W1, W2, b1, b2, bnbias, bngain
 
 
 @app.cell
-def _(C, F, W1, W2, Xtr, Ytr, b1, b2, block_size, bngain, bnbias, torch):
+def _(C, W1, W2, Xtr, Ytr, b1, b2, bnbias, bngain, torch):
     # --- Construct minibatch and forward pass (chunkated into atomic ops) ---
     batch_size = 32
     n = batch_size
@@ -151,20 +151,39 @@ def _(C, F, W1, W2, Xtr, Ytr, b1, b2, block_size, bngain, bnbias, torch):
     loss.backward()
 
     print(f"loss: {loss.item():.4f}")
-    return (
-        Xb, Yb, batch_size, bndiff, bndiff2, bnmeani, bnraw, bnvar, bnvar_inv,
-        counts, counts_sum, counts_sum_inv, emb, embcat, h, hpreact, hprebn,
-        logit_maxes, logits, logprobs, loss, n, norm_logits, probs,
-    )
+    return Yb, counts, counts_sum, counts_sum_inv, logprobs, n, probs
 
 
 @app.cell
-def _():
+def _(Yb, cmp, counts, counts_sum, counts_sum_inv, logprobs, n, probs, torch):
     # ============================================================
     # Exercise 1: backprop through the whole thing manually
     # backpropagating through every variable one at a time
     # ============================================================
-    # YOUR CODE HERE
+
+    # loss = -logprobs[range(n), Yb].mean()
+    dlogprobs = torch.zeros_like(logprobs)
+    dlogprobs[range(n), Yb] = -1.0 / n
+    cmp("logprobs", dlogprobs, logprobs)
+
+    # logprobs = probs.log()
+    dprobs = (1.0 / probs) * dlogprobs
+    cmp("probs", dprobs, probs)
+
+    # probs = counts * counts_sum_inv
+    dcounts_sum_inv = (counts * dprobs).sum(1, keepdim=True)
+    dcounts = counts_sum_inv * dprobs
+    cmp("counts_sum_inv", dcounts_sum_inv, counts_sum_inv)
+
+    # counts_sum_inv = counts_sum ** -1
+    dcounts_sum = (-counts_sum ** -2) * dcounts_sum_inv
+    cmp("counts_sum", dcounts_sum, counts_sum)
+
+    # counts_sum = counts.sum(1, keepdims=True)
+    dcounts += torch.ones_like(counts) * dcounts_sum
+    cmp("counts", dcounts, counts)
+
+    # YOUR CODE: continue backwards from here...
     return
 
 
