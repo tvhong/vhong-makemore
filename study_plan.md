@@ -148,6 +148,7 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 |------|-------|------|
 | Mar 26 | 0.5h | Pre-lecture discussion: activation/gradient diagnostics, saturation, residual connections |
 | Apr 4 | 1.5h | Block 1 review, Block 2 quiz + implemented BN with gamma/beta and running stats (steps 5–8) |
+| Apr 5 | 2h | Block 3: quiz, refactored into module classes, built 3-layer MLP with training loop + diagnostics (steps 9–11) |
 
 #### Block 1: Initialization & Activation Statistics (~40 min watch, ~1.5h implement)
 
@@ -171,7 +172,7 @@ Starting from our lecture 2 MLP, we'll diagnose and fix training pathologies. By
 
 **Watch** the remaining section on gradient diagnostics and going deeper. Then pause and implement:
 
-9. [ ] Add instrumentation: plot gradient distributions and gradient-to-data ratios per layer
-10. [ ] Diagnose tanh saturation — identify layers where activations are stuck at ±1
-11. [ ] Build a deeper MLP (e.g., 3+ hidden layers) with BN and proper init
+9. [x] Add instrumentation: plot gradient distributions and gradient-to-data ratios per layer
+10. [x] Diagnose tanh saturation — identify layers where activations are stuck at ±1
+11. [x] Build a deeper MLP (e.g., 3+ hidden layers) with BN and proper init
 12. [ ] Train the deep model and compare loss to the single-hidden-layer MLP from lecture 2
