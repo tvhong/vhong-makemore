@@ -67,7 +67,7 @@ def _(torch):
 
     class Linear:
         def __init__(self, fan_in, fan_out, bias=True, generator=None):
-            self.weight = torch.randn((fan_in, fan_out), generator=generator) * fan_in**0.5
+            self.weight = torch.randn((fan_in, fan_out), generator=generator) * fan_in**-0.5
             self.bias = torch.zeros(fan_out) if bias else None
 
         def __call__(self, x):
@@ -175,10 +175,14 @@ def _(
     ys_train,
 ):
     # --- Training loop ---
-    _max_steps = 20000
+    _max_steps = 2000
     _batch_size = 32
     _lr = 0.1
     _lossi = []
+
+    # Track update-to-data ratios per layer over time
+    _linear_layers = [_l for _l in layers if hasattr(_l, "weight")]
+    ud_ratios = {_i: [] for _i in range(len(_linear_layers))}
 
     _g = torch.Generator().manual_seed(42)
 
@@ -205,6 +209,12 @@ def _(
             _p.data += -_lr_current * _p.grad
 
         _lossi.append(_loss.log10().item())
+
+        # Log update-to-data ratio
+        with torch.no_grad():
+            for _j, _ll in enumerate(_linear_layers):
+                _ud = (_lr_current * _ll.weight.grad).std() / _ll.weight.data.std()
+                ud_ratios[_j].append(_ud.log10().item())
 
     _fig, _ax = plt.subplots(figsize=(10, 4))
     _ax.plot(_lossi)
